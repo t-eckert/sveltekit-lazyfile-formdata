@@ -4,7 +4,7 @@
 	const result = $derived(upload.result);
 </script>
 
-<h1>SvelteKit: a file from a remote <code>form</code> is stringified by <code>FormData</code></h1>
+<h1>A remote form's <code>File</code> is silently replaced with <code>[object Object]</code> when appended to a <code>FormData</code> with a filename</h1>
 
 <p>
 	Pick any small text file and submit. The handler appends the file it was given to a new
