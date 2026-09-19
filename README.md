@@ -129,6 +129,27 @@ cause. It restores the error the proxy suppressed, without giving the proxy up.
 **Constructing the file eagerly** also works and gives up the laziness the type
 exists for.
 
+## How wide the problem is
+
+`FormData.append` with a filename is not the only path. Every platform API that
+brand-checks was tried; two of them lose the contents silently, and both lose
+them the same way — by falling back to string coercion.
+
+| path | result |
+| --- | --- |
+| `FormData.append(name, file)` | intact |
+| `FormData.append(name, file, filename)` | **`[object Object]`** |
+| `new Blob([file])` | **`[object Object]`** |
+| `new Response(file)` | intact |
+| `fetch(url, { body: file })` | intact |
+| `structuredClone(file)` | throws, loudly |
+
+`new Blob([file])` matters on its own: re-wrapping or concatenating an upload is
+an ordinary thing to do, and it corrupts with no warning.
+
+The `Symbol.toPrimitive` guard closes both, because both failures are the same
+failure. It does not make either path *work* — it makes them stop lying.
+
 ## A second, separate bug worth noting
 
 That `File` subclass result is its own finding: in undici, a `Blob` subclass that
