@@ -1,13 +1,7 @@
 import { form } from '$app/server';
 import { getRequestEvent } from '$app/server';
 
-/**
- * What the handler was handed, what FormData did with it in process, and what
- * arrived at the other end once `fetch` sent it.
- *
- * No schema library and no validation: `'unchecked'` is used deliberately so
- * that nothing but SvelteKit itself is in the path.
- */
+/** File as received, in transit, and after fetch. No validation (`'unchecked'`) to isolate SvelteKit alone. */
 export interface Diagnosis {
 	constructorName: string;
 	instanceofFile: boolean;
