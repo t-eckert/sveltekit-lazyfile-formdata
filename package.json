@@ -6,8 +6,7 @@
     "dev": "vite dev",
     "build": "vite build",
     "preview": "vite preview",
-    "prepare": "svelte-kit sync || echo ''",
-    "repro:native": "node repro-native.mjs"
+    "prepare": "svelte-kit sync || echo ''"
   },
   "devDependencies": {
     "@sveltejs/adapter-node": "^6.0.0-next.10",
