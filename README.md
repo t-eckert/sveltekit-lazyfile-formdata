@@ -86,14 +86,55 @@ text-extracted, indexed and acknowledged by email as 15 bytes reading
 `[object Object]`. The API, the conversion job and the mailer all reported
 success. The only way to notice was to read the row in the database.
 
+## The prototype lie is what makes it silent
+
+Without the proxy, undici refuses the value outright on the three-argument path:
+
+```
+TypeError: Failed to execute 'append' on 'FormData': parameter 2 is not of type 'Blob'
+```
+
+The proxy gets the value past that type check, and undici then coerces what it
+could not convert. So the trick turns an immediate, accurate `TypeError` into
+silent data loss. That is the heart of the report.
+
 ## Suggested fix
 
-Make the value a real `Blob` subclass so the WebIDL conversion accepts it. If it
-must stay lazy, throwing on a failed conversion would be far better than silent
-coercion — the current behaviour is indistinguishable from a successful upload.
+`node fixes.mjs` walks the mechanism and three candidates with no SvelteKit and
+no server involved.
 
-A `LazyFile` that lies to `instanceof` but not to the platform is the underlying
-hazard, and this overload is one way it shows up rather than the only one.
+**Subclassing `Blob`/`File` does not work**, which is the non-obvious part. A real
+`File` subclass constructed with `super([])` and overriding `size` and `stream()`
+passes every type check and still fails: the three-argument path reads the blob's
+internal slots rather than calling `stream()`, so the part is written **empty**.
+That is worse than the current bug, because `[object Object]` is at least a
+marker and an empty part is not.
+
+**Refusing string coercion works, and keeps everything else.** Give the value a
+`Symbol.toPrimitive` that throws:
+
+```js
+[Symbol.toPrimitive]() {
+	throw new TypeError(
+		'A file from a remote form cannot be converted to a string. It was probably ' +
+			'passed to FormData.append() with a filename argument; omit the filename.'
+	);
+}
+```
+
+The two-argument path is unchanged and still lazy, validators are still
+satisfied, and the three-argument path now fails loudly with a message naming the
+cause. It restores the error the proxy suppressed, without giving the proxy up.
+
+**Constructing the file eagerly** also works and gives up the laziness the type
+exists for.
+
+## A second, separate bug worth noting
+
+That `File` subclass result is its own finding: in undici, a `Blob` subclass that
+implements laziness by overriding `stream()` is silently emptied when appended
+with a filename. Subclassing `Blob` is unsound on that path for anyone, not just
+SvelteKit. It may deserve its own report against Node.
 
 ## Prior art
 
