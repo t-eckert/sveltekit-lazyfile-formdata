@@ -1,6 +1,6 @@
 # `FormData.append(name, file, filename)` silently replaces a remote form's file with `[object Object]`
 
-`@sveltejs/kit@3.0.0-next.25`, `undici` via Node 22.23.2.
+Reproduced on `@sveltejs/kit@3.0.0-next.27` (and `next.25`), `undici` via Node 22.23.2.
 
 ## Summary
 
@@ -94,3 +94,18 @@ coercion — the current behaviour is indistinguishable from a successful upload
 
 A `LazyFile` that lies to `instanceof` but not to the platform is the underlying
 hazard, and this overload is one way it shows up rather than the only one.
+
+## Prior art
+
+The `getPrototypeOf` trick is there on purpose, and #15018 is why: a `LazyFile`
+without it failed `zod`'s `z.file()`. That issue is about the proxy not being
+convincing *enough* — under Bun, `instanceof` still failed — and it was closed as
+a Bun bug.
+
+This report is the other side of the same design. The proxy convinces a
+validator and does not convince undici's WebIDL `Blob` conversion, so the value
+passes a type check and then loses its contents when handed to a platform API.
+
+Two other `LazyFile` issues are adjacent and neither covers this: #16116
+(`stream()` failing on the Cloudflare adapter for larger files) and #17147
+(binary form file metadata accepting invalid sizes).
