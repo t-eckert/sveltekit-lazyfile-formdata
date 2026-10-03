@@ -228,8 +228,8 @@ coercing, like the subclass case, would still produce empty output. No such
 path is known for the value SvelteKit ships today.
 
 A patch with a test that fails without it is on
-[`t-eckert/kit`, branch `fix/lazyfile-refuses-string-coercion`](https://github.com/t-eckert/kit/tree/fix/lazyfile-refuses-string-coercion),
-off `3.0.0-next.27`.
+[`t-eckert/kit`, branch `fix/lazyfile-refuses-string-coercion-3.0.0`](https://github.com/t-eckert/kit/tree/fix/lazyfile-refuses-string-coercion-3.0.0),
+off `3.0.0`.
 
 **No shape of proxy can make the filename path work.** The filename branch of
 `makeEntry` ends in `new File([value], filename)` on every undici version, and
