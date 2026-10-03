@@ -1,6 +1,6 @@
 # A remote form's `File` is silently replaced with `[object Object]` when appended to a `FormData` with a filename
 
-> Reproduced on `@sveltejs/kit@3.0.0-next.27` (and `next.25`) under Node 22.23.2 (`undici@6.28.0`) and Node 24.21.0 (`undici@7.29.1`).
+> Reproduced on `@sveltejs/kit@3.0.0` (and `3.0.0-next.27`, `next.25`) under Node 22.23.2 (`undici@6.28.0`) and Node 24.21.0 (`undici@7.29.1`).
 
 ## Summary
 
